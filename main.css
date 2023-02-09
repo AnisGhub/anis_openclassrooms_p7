@@ -1,0 +1,55 @@
+form {
+    display: flex;
+    align-items: center;
+}
+#search-input {
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    width: 80%;
+}
+#search-button {
+    width: 20%;
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+}
+
+
+/* Container for ingredient dropdown */
+#ingredient-dropdown {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 10px;
+    background-color: #f2f2f2;
+    border-radius: 5px;
+}
+
+/* Style for each ingredient button in dropdown */
+.ingredient-button {
+    background-color: white;
+    border: 1px solid gray;
+    padding: 5px 10px;
+    margin: 5px;
+    border-radius: 5px;
+}
+
+/* Container for ingredient tags */
+#ingredient-tags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 10px;
+}
+
+/* Style for each ingredient tag */
+.ingredient-tag {
+    background-color: #f2f2f2;
+    padding: 5px 10px;
+    margin: 5px;
+    border-radius: 5px;
+}
