@@ -35,6 +35,11 @@ class Controller {
             this.ingredientsView.updateIngredientDropdown(this.model.uniqueIngredients(filteredRecipes));
         });
         
+        this.ingredientsView.bindFilterEvent((searchTerm) => {
+            const filteredIngredients = this.model.filterIngredients(searchTerm);
+            this.ingredientsView.updateIngredientDropdown(filteredIngredients);
+        });
+    
         this.ingredientsView.tagContainer.addEventListener("ingredient-added", (event) => {
             const ingredient = event.detail;
             const filteredRecipes = this.model.filterRecipesByIngredient(ingredient);

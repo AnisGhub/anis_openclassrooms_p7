@@ -2,7 +2,8 @@ export class Model {
     constructor() {
         this.state = {
             recipes: [],
-            filteredRecipes: []
+            filteredRecipes: [],
+            currentIngredients: [],
             // currentTagsingredients: [],
             // currentTagsMaterial: [],
             // currentRecipe: null,
@@ -66,6 +67,7 @@ export class Model {
                 }
             }
         }
+        //todo une methode qui met a jour le state currentingredients
         this.state.filteredRecipes = filteredRecipes;
         return filteredRecipes;
     }
@@ -126,6 +128,7 @@ export class Model {
                 }
             }
         }
+        this.state.currentIngredients = ingredients;
         return ingredients;
     }
 
@@ -146,6 +149,15 @@ export class Model {
 
 
 
+
+    filterIngredients(searchTerm) {
+        console.log(this.state.currentIngredients);
+        if (searchTerm.length < 3) {
+            return this.state.currentIngredients;
+        }
+        const filteredIngredients = this.state.currentIngredients.filter(ingredient => ingredient.ingredient.includes(searchTerm));
+        return filteredIngredients;
+    }
 
     
     // recuperer la data et rechercher 

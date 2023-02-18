@@ -1,18 +1,22 @@
 form {
     display: flex;
     align-items: center;
+    
 }
 #search-input {
     padding: 10px;
     font-size: 16px;
     border: none;
     width: 80%;
+    margin-bottom: 50px;
+    background-color: bisque;
 }
 #search-button {
     width: 20%;
     background-color: #4CAF50;
     color: white;
     padding: 10px;
+    margin-bottom: 50px;
     font-size: 16px;
     border: none;
     cursor: pointer;
@@ -28,6 +32,15 @@ form {
     background-color: #f2f2f2;
     border-radius: 5px;
 }
+
+#ingredient-search {
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+  }
 
 /* Style for each ingredient button in dropdown */
 .ingredient-button {
