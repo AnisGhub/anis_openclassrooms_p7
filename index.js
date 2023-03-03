@@ -6,6 +6,7 @@ const searchInput = document.getElementById("search-input");
 
 const dropdownContainer = document.getElementById("ingredient-dropdown");
 const ingredientList = document.getElementById("ingredient-list");
+const applianceList = document.getElementById("appliance-list");
 const tagContainer = document.getElementById("tags");
 
 
@@ -26,9 +27,7 @@ async function fetchRecipes() {
         alert("Une erreur s'est produite lors de la récupération des recettes. Veuillez réessayer plus tard.");
     }
 }
-    
-   
-    
+
 
 /**
 * Trie les recettes selon différents critères de recherche.
@@ -40,15 +39,14 @@ async function fetchRecipes() {
 function sort(recipes) {
     let sortedRecipes = [];
     sortedRecipes = sortByKeyword(recipes);
-    sortedRecipes = sortByIngredients(recipes);
-    //sortedRecipes = sortByAppliance(recipes);
+    sortedRecipes = sortByIngredients(sortedRecipes);
+    sortedRecipes = sortByAppliance(sortedRecipes);
     // sortedRecipes = sortByUstensils();
     
     return sortedRecipes;
 }
-    
-    
-    
+
+
 /**
 * Retourne un tableau d'ingrédients unique (sans doublon) parmi toutes les recettes.
 *
@@ -71,8 +69,30 @@ function uniqueIngredients(recipes) {
     }
     return uniqueIngredients;
 }
-    
-    
+
+
+/**
+ * Retourne un tableau d'appareils unique (sans doublon) parmi toutes les recettes.
+ *
+ * @function
+ * @param {Array} recipes - les recettes.
+ * @returns {Array} Un tableau d'appareils unique.
+ */
+function uniqueAppliances(recipes) {
+    const uniqueAppliances = [];
+    const appliancesList = [];
+    for (let i = 0; i < recipes.length; i++) {
+        const recipe = recipes[i];
+        const appliance = recipe.appliance.toLowerCase();
+        if (!appliancesList.includes(appliance)) {
+            appliancesList.push(appliance);
+            uniqueAppliances.push(recipe.appliance);
+        }
+    }
+    return uniqueAppliances;
+}
+
+
 /**
 * Trie les recettes en fonction d'un terme de recherche saisi par l'utilisateur.
 *
@@ -101,8 +121,8 @@ function sortByKeyword(recipes) {
     }
     return filteredRecipes;
 }
-    
-    
+
+
 /**
 * Trie les recettes en fonction des tags d'ingrédients sélectionnés par l'utilisateur.
 *
@@ -149,8 +169,37 @@ function sortByIngredients(recipes) {
     }
     return filteredRecipes;
 }
-    
-    
+
+
+/**
+ * Trie les recettes en fonction de l'appareil sélectionné par l'utilisateur.
+ *
+ * @function
+ * @param {Array} recipes - La liste des recettes à trier.
+ * @returns {Array} La liste des recettes triées en fonction de l'appareil sélectionné par l'utilisateur.
+ */
+function sortByAppliance(recipes) {
+    // Récupère le tag appareil sélectionné
+    const selectedTag = tagContainer.querySelector(".appliance-tag");
+    // Si aucun tag appareil n'est sélectionné, renvoie la liste des recettes non triées
+    if (!selectedTag) {
+      return recipes;
+    }
+    const selectedAppliance = selectedTag.innerHTML;
+    const filteredRecipes = [];
+  
+    // Parcours chaque recette et ajoute celles qui correspondent à l'appareil sélectionné à la liste filtrée
+    for (let i = 0; i < recipes.length; i++) {
+      const recipe = recipes[i];
+      if (recipe.appliance.toLowerCase() === selectedAppliance.toLowerCase()) {
+        filteredRecipes.push(recipe);
+      }
+    }
+  
+    return filteredRecipes;
+  }
+
+
 /**
 * Met à jour la liste d'ingrédients (dans le dropdown) dans l'interface utilisateur.
 *
@@ -172,7 +221,30 @@ function renderIngredients(ingredients) {
         ingredientList.appendChild(button);
     });
 }
-    
+
+
+/**
+* Met à jour la liste d'appareils (dans le dropdown) dans l'interface utilisateur.
+*
+* @function
+* @param {Array} appliances - La liste d'appareils à afficher.
+* @returns {void}
+*/
+function renderAppliances(appliances) {
+    applianceList.innerHTML = "";
+
+    appliances.forEach((appliance) => {
+        const button = document.createElement("button");
+        button.classList.add("ingredient-button");
+        button.innerHTML = appliance;
+        button.addEventListener("click", () => {
+            addAppliance(appliance);
+        });
+        applianceList.appendChild(button);
+    });
+}
+
+
 /**
 * Ajoute un ingrédient à la liste des tags sélectionnés.
 *
@@ -204,6 +276,7 @@ async function addIngredient(ingredient) {
         // Trie les recettes et met à jour l'affichage
         let sortedRecipes = sort(recipes);
         renderIngredients(uniqueIngredients(sortedRecipes)); 
+        renderAppliances(uniqueAppliances(sortedRecipes)); 
         recipesView.updateView(sortedRecipes);
         
     } catch (error) {
@@ -212,7 +285,51 @@ async function addIngredient(ingredient) {
     }
 }
 
+
+/**
+* Ajoute un appareil à la liste des tags sélectionnés.
+*
+* @function
+* @param {string} appliance - L'appareil à ajouter.
+* @returns {void}
+*/
+async function addAppliance(appliance) {
+    try {
+        // Check if appliance already exists in tags
+        const existingTags = tagContainer.querySelectorAll(".appliance-tag");
+        for (let i = 0; i < existingTags.length; i++) {
+            if (existingTags[i].innerHTML === appliance) {
+                return;
+            }
+        }
         
+        // Create new tag and add to tag container
+        const tag = document.createElement("span");
+        tag.classList.add("appliance-tag");
+        tag.innerHTML = appliance;
+        tag.addEventListener("click", () => {
+            removeAppliance(appliance);
+        });
+        tagContainer.appendChild(tag);
+        
+        // Récupère la liste des recettes depuis l'API
+        const recipes = await fetchRecipes();
+        
+        // Trie les recettes et met à jour l'affichage
+        let sortedRecipes = sort(recipes);
+        renderIngredients(uniqueIngredients(sortedRecipes)); 
+        renderAppliances(uniqueAppliances(sortedRecipes)); 
+        recipesView.updateView(sortedRecipes);
+        
+    } catch (error) {
+        console.error(error);
+        alert(
+            "Une erreur s'est produite lors de la récupération des recettes. Veuillez réessayer plus tard."
+            );
+    }
+}
+
+
 /**
 * Retire un ingrédient de la liste des tags sélectionnés.
 *
@@ -233,6 +350,7 @@ async function removeIngredient(ingredient) {
             // Trie les recettes et met à jour l'affichage
             let sortedRecipes = sort(recipes);
             renderIngredients(uniqueIngredients(sortedRecipes)); 
+            renderAppliances(uniqueAppliances(sortedRecipes));
             recipesView.updateView(sortedRecipes);
         }
         
@@ -251,7 +369,39 @@ async function removeIngredient(ingredient) {
             tagContainer.appendChild(tag);
     }
 }
-            
+
+
+/**
+ * Retire un appareil de la liste des tags sélectionnés et met à jour la liste des recettes.
+ *
+ * @function
+ * @param {string} appliance - L'appareil à retirer.
+ * @returns {void}
+ */
+async function removeAppliance(appliance) {
+    try {
+        // Récupère le tag correspondant à l'appareil à retirer
+        const applianceTags = Array.from(tagContainer.querySelectorAll(".appliance-tag"));
+        const tagToRemove = applianceTags.find((tag) => tag.innerHTML === appliance);
+        if (tagToRemove) {
+            tagContainer.removeChild(tagToRemove);
+
+            // Récupère la liste des recettes depuis l'API
+            const recipes = await fetchRecipes();
+
+            // Trie les recettes en fonction des tags sélectionnés et met à jour l'affichage
+            let sortedRecipes = sort(recipes);
+            renderIngredients(uniqueIngredients(sortedRecipes));
+            renderAppliances(uniqueAppliances(sortedRecipes));
+            recipesView.updateView(sortedRecipes);
+        }
+    } catch (error) {
+        console.error(error);
+        alert("Une erreur s'est produite lors de la récupération des recettes. Veuillez réessayer plus tard.");
+    }
+}
+
+
 /**
 * Recherche des ingrédients correspondant au terme de recherche.
 *
@@ -259,10 +409,11 @@ async function removeIngredient(ingredient) {
 * @param {string} searchTerm - Le terme de recherche.
 * @returns {void}
 */
+
+
 function searchIngredients(searchTerm) {}
-            
-            
-            
+
+
 /**
 * Initialise l'application.
 *
@@ -279,6 +430,7 @@ async function init() {
         // Trie les recettes et met à jour l'affichage
         let sortedRecipes = sort(recipes);
         renderIngredients(uniqueIngredients(sortedRecipes)); 
+        renderAppliances(uniqueAppliances(sortedRecipes));
         recipesView.updateView(sortedRecipes);
         
         
@@ -286,6 +438,7 @@ async function init() {
         searchInput.addEventListener("input", (e) => {
             sortedRecipes = sort(recipes);
             renderIngredients(uniqueIngredients(sortedRecipes));
+            renderAppliances(uniqueAppliances(sortedRecipes));
             recipesView.updateView(sortedRecipes);
         });
         
@@ -299,6 +452,6 @@ async function init() {
         alert("Une erreur s'est produite lors de la récupération des recettes. Veuillez réessayer plus tard.");
     }
 }
-                
-                
+
+
 init();
