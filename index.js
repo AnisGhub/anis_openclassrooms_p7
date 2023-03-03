@@ -23,13 +23,13 @@ async function fetchRecipes() {
         return recipes;
     } catch (error) {
         console.error(error);
-        alert(
-            "Une erreur s'est produite lors de la récupération des recettes. Veuillez réessayer plus tard."
-            );
-        }
+        alert("Une erreur s'est produite lors de la récupération des recettes. Veuillez réessayer plus tard.");
+    }
 }
     
+   
     
+
 /**
 * Trie les recettes selon différents critères de recherche.
 *
@@ -38,16 +38,15 @@ async function fetchRecipes() {
 * @returns {Array} - Un tableau trié de recettes.
 */
 function sort(recipes) {
-    
     let sortedRecipes = [];
     sortedRecipes = sortByKeyword(recipes);
     sortedRecipes = sortByIngredients(recipes);
     //sortedRecipes = sortByAppliance(recipes);
     // sortedRecipes = sortByUstensils();
-
+    
     return sortedRecipes;
 }
-
+    
     
     
 /**
@@ -82,7 +81,6 @@ function uniqueIngredients(recipes) {
 * @returns {Array} - Un tableau trié de recettes.
 */
 function sortByKeyword(recipes) {
-
     const searchTerm = searchInput.value;
     if (!searchTerm || searchTerm.length < 3) {
         return recipes;
@@ -103,8 +101,8 @@ function sortByKeyword(recipes) {
     }
     return filteredRecipes;
 }
-
-
+    
+    
 /**
 * Trie les recettes en fonction des tags d'ingrédients sélectionnés par l'utilisateur.
 *
@@ -115,7 +113,7 @@ function sortByKeyword(recipes) {
 function sortByIngredients(recipes) {
     const selectedTags = Array.from(tagContainer.querySelectorAll(".ingredient-tag"));
     const selectedIngredients = selectedTags.map(tag => tag.innerHTML);
-
+    
     // Si aucun ingrédient n'est sélectionné, retourne toutes les recettes
     if (selectedTags.length === 0) {
         return recipes;
@@ -130,7 +128,7 @@ function sortByIngredients(recipes) {
         for (let j = 0; j < selectedIngredients.length; j++) {
             const selectedIngredient = selectedIngredients[j];
             let foundIngredient = false;
-             // Vérifie si l'ingrédient sélectionné est présent dans la recette
+            // Vérifie si l'ingrédient sélectionné est présent dans la recette
             for (let k = 0; k < recipe.ingredients.length; k++) {
                 const recipeIngredient = recipe.ingredients[k].ingredient;
                 if (recipeIngredient === selectedIngredient) {
@@ -144,15 +142,15 @@ function sortByIngredients(recipes) {
                 break;
             }
         }
-         // Si la recette contient tous les ingrédients sélectionnés, l'ajoute au tableau des recettes filtrées
+        // Si la recette contient tous les ingrédients sélectionnés, l'ajoute au tableau des recettes filtrées
         if (containsAllIngredients) {
             filteredRecipes.push(recipe);
         }
     }
     return filteredRecipes;
 }
-
-
+    
+    
 /**
 * Met à jour la liste d'ingrédients (dans le dropdown) dans l'interface utilisateur.
 *
@@ -174,7 +172,7 @@ function renderIngredients(ingredients) {
         ingredientList.appendChild(button);
     });
 }
-
+    
 /**
 * Ajoute un ingrédient à la liste des tags sélectionnés.
 *
@@ -182,29 +180,39 @@ function renderIngredients(ingredients) {
 * @param {Object} ingredient - L'objet ingrédient à ajouter.
 * @returns {void}
 */
-function addIngredient(ingredient) {
-    // Check if ingredient already exists in tags
-    const existingTags = tagContainer.querySelectorAll(".ingredient-tag");
-    for (let i = 0; i < existingTags.length; i++) {
-        if (existingTags[i].innerHTML === ingredient.ingredient) {
-            return;
+async function addIngredient(ingredient) {
+    try {
+        // Check if ingredient already exists in tags
+        const existingTags = tagContainer.querySelectorAll(".ingredient-tag");
+        for (let i = 0; i < existingTags.length; i++) {
+            if (existingTags[i].innerHTML === ingredient.ingredient) {
+                return;
+            }
         }
+        // appel api qui donne les parametres ( page = 1 => limite resultars) 
+        const recipes = await fetchRecipes();
+        
+        // Create new tag and add to tag container
+        const tag = document.createElement("span");
+        tag.classList.add("ingredient-tag");
+        tag.innerHTML = ingredient.ingredient;
+        tag.addEventListener("click", () => {
+            removeIngredient(ingredient);
+        });
+        tagContainer.appendChild(tag);
+        
+        // Trie les recettes et met à jour l'affichage
+        let sortedRecipes = sort(recipes);
+        renderIngredients(uniqueIngredients(sortedRecipes)); 
+        recipesView.updateView(sortedRecipes);
+        
+    } catch (error) {
+        console.error(error);
+        alert("Une erreur s'est produite lors de la récupération des recettes. Veuillez réessayer plus tard.");
     }
-    // Create new tag and add to tag container
-    const tag = document.createElement("span");
-    tag.classList.add("ingredient-tag");
-    tag.innerHTML = ingredient.ingredient;
-    tag.addEventListener("click", () => {
-        removeIngredient(ingredient);
-
-        // appel api qui donne les parametres ( page = 1 => limite resultars) de trie et qui recoit la liste des recettes triés ( fetch + trie )
-        // display 
-        // mise à jour des dropdown 
-
-    });
-    tagContainer.appendChild(tag);
 }
 
+        
 /**
 * Retire un ingrédient de la liste des tags sélectionnés.
 *
@@ -212,15 +220,38 @@ function addIngredient(ingredient) {
 * @param {Object} ingredient - L'objet ingrédient à retirer.
 * @returns {void}
 */
-function removeIngredient(ingredient) {
-    const ingredientTags = Array.from(tagContainer.querySelectorAll(".ingredient-tag"));
-    const tagToRemove = ingredientTags.find((tag) => tag.innerHTML === ingredient.ingredient);
-    if (tagToRemove) {
-        tagContainer.removeChild(tagToRemove);
+async function removeIngredient(ingredient) {
+    try {
+        const ingredientTags = Array.from(tagContainer.querySelectorAll(".ingredient-tag"));
+        const tagToRemove = ingredientTags.find((tag) => tag.innerHTML === ingredient.ingredient);
+        if (tagToRemove) {
+            tagContainer.removeChild(tagToRemove);
+            
+            // Récupère la liste des recettes depuis l'API
+            const recipes = await fetchRecipes();
+            
+            // Trie les recettes et met à jour l'affichage
+            let sortedRecipes = sort(recipes);
+            renderIngredients(uniqueIngredients(sortedRecipes)); 
+            recipesView.updateView(sortedRecipes);
+        }
+        
+    } catch (error) {
+        console.error(error);
+        alert(
+            "Une erreur s'est produite lors de la récupération des recettes. Veuillez réessayer plus tard."
+            );
+            // Add back the ingredient tag to the tag container
+            const tag = document.createElement("span");
+            tag.classList.add("ingredient-tag");
+            tag.innerHTML = ingredient.ingredient;
+            tag.addEventListener("click", () => {
+                removeIngredient(ingredient);
+            });
+            tagContainer.appendChild(tag);
     }
-    console.log(ingredientTags);
 }
-
+            
 /**
 * Recherche des ingrédients correspondant au terme de recherche.
 *
@@ -229,12 +260,9 @@ function removeIngredient(ingredient) {
 * @returns {void}
 */
 function searchIngredients(searchTerm) {}
-
-
-
-
-
-
+            
+            
+            
 /**
 * Initialise l'application.
 *
@@ -243,66 +271,34 @@ function searchIngredients(searchTerm) {}
 * @returns {void}
 */
 async function init() {
-try {
-    
-    // Récupère la liste des recettes depuis l'API
-    const recipes = await fetchRecipes();
-    
-    // Trie les recettes et met à jour l'affichage
-    let sortedRecipes = sort(recipes);
-    renderIngredients(uniqueIngredients(sortedRecipes)); 
-    // Affichage des items dans les dropdown 
-      //  =>  créer event au clique deussus pour ajouter dans les tags 
-                    // si declanchement event au clique sur l'item 
-                     // Ajout l'item dans la liste de tags
-                     // créer event pour supprimer le tags
-                     // lance le quatuors trie (receupere les recettes + trie en recherchant la value de l'input + Les tags selectionné)
-                     // Mise à jour de la liste des items dans les dropdowns 
-
-    //
-    recipesView.updateView(sortedRecipes);
-    
-    //recipesView.updateView(sortedRecipes);
-    //renderIngredients(uniqueIngredients(sortedRecipes));
-    
-    
-    // Event Listener management pour les recherches et les tags sélectionnés
-    searchInput.addEventListener("input", (e) => {
-        sortedRecipes = sort(recipes);
+    try {
+        
+        // Récupère la liste des recettes depuis l'API
+        const recipes = await fetchRecipes();
+        
+        // Trie les recettes et met à jour l'affichage
+        let sortedRecipes = sort(recipes);
+        renderIngredients(uniqueIngredients(sortedRecipes)); 
         recipesView.updateView(sortedRecipes);
-        renderIngredients(uniqueIngredients(sortedRecipes));
-    });
-    
-    
-    // todo a enelever 
-    tagContainer.addEventListener("DOMNodeInserted", () => {
-        sortedRecipes = sort(recipes);
-        recipesView.updateView(sortedRecipes);
-        renderIngredients(uniqueIngredients(sortedRecipes));
-    });
-
-    
-    tagContainer.addEventListener("DOMNodeRemoved", () => {
-        sortedRecipes = sort(recipes);
-        recipesView.updateView(sortedRecipes);
-        renderIngredients(uniqueIngredients(sortedRecipes));
-    });
-    
-    
-    
-    // ingredientsView.bindFilterEvent((searchTerm) => {
-    //   const filteredIngredients = filterIngredients(searchTerm, recipes);
-    //   ingredientsView.updateIngredientDropdown(filteredIngredients);
-    // });
-    
-} catch (error) {
-    console.error(error);
-    alert(
-        "Une erreur s'est produite lors de la récupération des recettes. Veuillez réessayer plus tard."
-        );
+        
+        
+        // Event Listener management pour les recherches 
+        searchInput.addEventListener("input", (e) => {
+            sortedRecipes = sort(recipes);
+            renderIngredients(uniqueIngredients(sortedRecipes));
+            recipesView.updateView(sortedRecipes);
+        });
+        
+        // ingredientsView.bindFilterEvent((searchTerm) => {
+        //   const filteredIngredients = filterIngredients(searchTerm, recipes);
+        //   ingredientsView.updateIngredientDropdown(filteredIngredients);
+        // });
+        
+    } catch (error) {
+        console.error(error);
+        alert("Une erreur s'est produite lors de la récupération des recettes. Veuillez réessayer plus tard.");
     }
 }
-    
-    
-    
+                
+                
 init();
