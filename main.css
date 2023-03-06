@@ -29,8 +29,15 @@ form {
     flex-wrap: wrap;
     align-items: center;
     padding: 10px;
-    background-color: #f2f2f2;
+    margin-bottom: 30px;
+    background-color: #3282f7;
     border-radius: 5px;
+}
+#appliance-dropdown{
+    background-color: #68d9a4;
+}
+#ustensil-dropdown{
+    background-color: #ed6454;
 }
 
 #ingredient-search, #appliance-search, #ustensil-search {
@@ -54,29 +61,34 @@ form {
 /* Container for ingredient tags */
 #tags{
     display: flex;
-    background-color: aquamarine;
     flex-wrap: wrap;
     align-items: center;
-    margin-top: 10px;
+    margin: 10px 0;
+    color: #fff;
 }
 
 /* Style for each ingredient tag */
 .ingredient-tag {
-    background-color: #f2f2f2;
+    background-color: #3282f7;
     padding: 5px 10px;
     margin: 5px;
     border-radius: 5px;
 }
 .appliance-tag{
-    background-color: #179236;
+    background-color: #68d9a4;
     padding: 5px 10px;
     margin: 5px;
     border-radius: 5px;
 }
 
 .ustensil-tag{
-    background-color:  #cec044;
+    background-color:  #ed6454;
     padding: 5px 10px;
     margin: 5px;
     border-radius: 5px;
+}
+
+/* recette */
+.titre-recette{
+    background-color: beige;
 }
