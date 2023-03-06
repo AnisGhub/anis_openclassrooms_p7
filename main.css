@@ -24,7 +24,7 @@ form {
 
 
 /* Container for ingredient dropdown */
-#ingredient-dropdown, #appliance-dropdown {
+#ingredient-dropdown, #appliance-dropdown, #ustensil-dropdown {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -33,7 +33,7 @@ form {
     border-radius: 5px;
 }
 
-#ingredient-search, #appliance-search {
+#ingredient-search, #appliance-search, #ustensil-search {
     padding: 10px;
     width: 100%;
     box-sizing: border-box;
@@ -43,7 +43,7 @@ form {
   }
 
 /* Style for each ingredient button in dropdown */
-.ingredient-button, .appliance-button {
+.ingredient-button, .appliance-button, .ustensil-button{
     background-color: white;
     border: 1px solid gray;
     padding: 5px 10px;
@@ -69,6 +69,13 @@ form {
 }
 .appliance-tag{
     background-color: #179236;
+    padding: 5px 10px;
+    margin: 5px;
+    border-radius: 5px;
+}
+
+.ustensil-tag{
+    background-color:  #cec044;
     padding: 5px 10px;
     margin: 5px;
     border-radius: 5px;
