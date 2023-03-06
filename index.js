@@ -127,12 +127,6 @@ function uniqueUstensils(recipes) {
 function sortByKeyword(recipes) {
     const searchTerm = searchInput.value;
     if (!searchTerm || searchTerm.length < 3) {
-        const tags = tagContainer.querySelectorAll("#tags span");
-        if (tags.length > 0) {
-            for (let i = 0; i < tags.length; i++) {
-                tags[i].remove();
-            }
-        }
         return recipes;
     }
     let filteredRecipes = [];
