@@ -7,6 +7,7 @@ const searchInput = document.getElementById("search-input");
 const dropdownContainer = document.getElementById("ingredient-dropdown");
 const ingredientList = document.getElementById("ingredient-list");
 const applianceList = document.getElementById("appliance-list");
+const ustensilList = document.getElementById("ustensil-list");
 const tagContainer = document.getElementById("tags");
 
 
@@ -41,7 +42,7 @@ function sort(recipes) {
     sortedRecipes = sortByKeyword(recipes);
     sortedRecipes = sortByIngredients(sortedRecipes);
     sortedRecipes = sortByAppliance(sortedRecipes);
-    // sortedRecipes = sortByUstensils();
+    sortedRecipes = sortByUstensils(sortedRecipes);
     
     return sortedRecipes;
 }
@@ -92,6 +93,29 @@ function uniqueAppliances(recipes) {
     return uniqueAppliances;
 }
 
+/**
+ * Retourne un tableau d'ustensiles unique (sans doublon) parmi toutes les recettes.
+ *
+ * @function
+ * @param {Array} recipes - les recettes.
+ * @returns {Array} Un tableau d'ustensiles unique.
+ */
+function uniqueUstensils(recipes) {
+    const uniqueUstensils = [];
+    const ustensilsList = [];
+    for (let i = 0; i < recipes.length; i++) {
+        const recipe = recipes[i];
+        for (let j = 0; j < recipe.ustensils.length; j++) {
+            const ustensil = recipe.ustensils[j].toLowerCase();
+            if (!ustensilsList.includes(ustensil)) {
+                ustensilsList.push(ustensil);
+                uniqueUstensils.push(recipe.ustensils[j]);
+            }
+        }
+    }
+    return uniqueUstensils;
+}
+
 
 /**
 * Trie les recettes en fonction d'un terme de recherche saisi par l'utilisateur.
@@ -103,6 +127,12 @@ function uniqueAppliances(recipes) {
 function sortByKeyword(recipes) {
     const searchTerm = searchInput.value;
     if (!searchTerm || searchTerm.length < 3) {
+        const tags = tagContainer.querySelectorAll("#tags span");
+        if (tags.length > 0) {
+            for (let i = 0; i < tags.length; i++) {
+                tags[i].remove();
+            }
+        }
         return recipes;
     }
     let filteredRecipes = [];
@@ -197,7 +227,48 @@ function sortByAppliance(recipes) {
     }
   
     return filteredRecipes;
-  }
+}
+
+
+/**
+ * Trie les recettes en fonction des ustensiles sélectionnés.
+ *
+ * @function
+ * @param {Array} recipes - Les recettes à trier.
+ * @returns {Array} Un tableau de recettes triées.
+ */
+function sortByUstensils(recipes) {
+    const selectedTags = Array.from(tagContainer.querySelectorAll(".ustensil-tag"));
+    if (selectedTags.length === 0) {
+        return recipes;
+    }
+
+    const selectedUstensils = selectedTags.map(tag => tag.innerHTML.toLowerCase());
+    const filteredRecipes = [];
+
+    for (let i = 0; i < recipes.length; i++) {
+        const recipe = recipes[i];
+        const recipeUstensils = [];
+        for (let i = 0; i < recipe.ustensils.length; i++) {
+            recipeUstensils.push(recipe.ustensils[i].toLowerCase());
+        }
+        let includeRecipe = true;
+
+        for (let j = 0; j < selectedUstensils.length; j++) {
+            const selectedUstensil = selectedUstensils[j];
+            if (!recipeUstensils.includes(selectedUstensil)) {
+                includeRecipe = false;
+                break;
+            }
+        }
+
+        if (includeRecipe) {
+            filteredRecipes.push(recipe);
+        }
+    }
+
+    return filteredRecipes;
+}
 
 
 /**
@@ -246,6 +317,28 @@ function renderAppliances(appliances) {
 
 
 /**
+* Met à jour la liste d'ustensiles (dans le dropdown) dans l'interface utilisateur.
+*
+* @function
+* @param {Array} ustensils - La liste d'ustensils à afficher.
+* @returns {void}
+*/
+function renderUstensils(ustensils) {
+    ustensilList.innerHTML = "";
+
+    ustensils.forEach((ustensil) => {
+        const button = document.createElement("button");
+        button.classList.add("ustensil-button");
+        button.innerHTML = ustensil;
+        button.addEventListener("click", () => {
+            addUstensil(ustensil);
+        });
+        ustensilList.appendChild(button);
+    });
+}
+
+
+/**
 * Ajoute un ingrédient à la liste des tags sélectionnés.
 *
 * @function
@@ -277,6 +370,7 @@ async function addIngredient(ingredient) {
         let sortedRecipes = sort(recipes);
         renderIngredients(uniqueIngredients(sortedRecipes)); 
         renderAppliances(uniqueAppliances(sortedRecipes)); 
+        renderUstensils(uniqueUstensils(sortedRecipes)); 
         recipesView.updateView(sortedRecipes);
         
     } catch (error) {
@@ -287,7 +381,7 @@ async function addIngredient(ingredient) {
 
 
 /**
-* Ajoute un appareil à la liste des tags sélectionnés.
+* Ajoute un appareil à la liste des tags sélectionnés et met à jour l'affichage..
 *
 * @function
 * @param {string} appliance - L'appareil à ajouter.
@@ -318,7 +412,8 @@ async function addAppliance(appliance) {
         // Trie les recettes et met à jour l'affichage
         let sortedRecipes = sort(recipes);
         renderIngredients(uniqueIngredients(sortedRecipes)); 
-        renderAppliances(uniqueAppliances(sortedRecipes)); 
+        renderAppliances(uniqueAppliances(sortedRecipes));
+        renderUstensils(uniqueUstensils(sortedRecipes));  
         recipesView.updateView(sortedRecipes);
         
     } catch (error) {
@@ -326,6 +421,52 @@ async function addAppliance(appliance) {
         alert(
             "Une erreur s'est produite lors de la récupération des recettes. Veuillez réessayer plus tard."
             );
+    }
+}
+
+
+/**
+ * Ajoute un ustensile à la liste des tags et met à jour l'affichage.
+ *
+ * @function
+ * @async
+ * @param {string} ustensil - Le nom de l'ustensile à ajouter.
+ * @returns {void}
+ */
+async function addUstensil(ustensil) {
+    try {
+        // Vérifie si l'ustensile existe déjà dans les tags
+        const existingTags = tagContainer.querySelectorAll(".ustensil-tag");
+        for (let i = 0; i < existingTags.length; i++) {
+            if (existingTags[i].innerHTML === ustensil) {
+                return;
+            }
+        }
+        
+        // Crée un nouveau tag et l'ajoute au conteneur de tags
+        const tag = document.createElement("span");
+        tag.classList.add("ustensil-tag");
+        tag.innerHTML = ustensil;
+        tag.addEventListener("click", () => {
+            removeUstensil(ustensil);
+        });
+        tagContainer.appendChild(tag);
+        
+        // Récupère la liste des recettes depuis l'API
+        const recipes = await fetchRecipes();
+        
+        // Trie les recettes et met à jour l'affichage
+        let sortedRecipes = sort(recipes);
+        renderIngredients(uniqueIngredients(sortedRecipes)); 
+        renderAppliances(uniqueAppliances(sortedRecipes)); 
+        renderUstensils(uniqueUstensils(sortedRecipes)); 
+        recipesView.updateView(sortedRecipes);
+        
+    } catch (error) {
+        console.error(error);
+        alert(
+            "Une erreur s'est produite lors de la récupération des recettes. Veuillez réessayer plus tard."
+        );
     }
 }
 
@@ -351,6 +492,7 @@ async function removeIngredient(ingredient) {
             let sortedRecipes = sort(recipes);
             renderIngredients(uniqueIngredients(sortedRecipes)); 
             renderAppliances(uniqueAppliances(sortedRecipes));
+            renderUstensils(uniqueUstensils(sortedRecipes)); 
             recipesView.updateView(sortedRecipes);
         }
         
@@ -393,11 +535,48 @@ async function removeAppliance(appliance) {
             let sortedRecipes = sort(recipes);
             renderIngredients(uniqueIngredients(sortedRecipes));
             renderAppliances(uniqueAppliances(sortedRecipes));
+            renderUstensils(uniqueUstensils(sortedRecipes)); 
             recipesView.updateView(sortedRecipes);
         }
     } catch (error) {
         console.error(error);
         alert("Une erreur s'est produite lors de la récupération des recettes. Veuillez réessayer plus tard.");
+    }
+}
+
+
+/**
+ * Retire un ustensile de la liste des tags sélectionnés et met à jour la liste des recettes.
+ *
+ * @function
+ * @param {string} ustensil - L'appareil à retirer.
+ * @returns {void}
+ */
+async function removeUstensil(ustensil) {
+    try {
+        // Remove tag from tag container
+        const tags = tagContainer.querySelectorAll(".ustensil-tag");
+        for (let i = 0; i < tags.length; i++) {
+            if (tags[i].innerHTML === ustensil) {
+                tags[i].remove();
+            }
+        }
+
+        // Récupère la liste des recettes depuis l'API
+        const recipes = await fetchRecipes();
+        
+        // Trie les recettes et met à jour l'affichage
+        let sortedRecipes = sort(recipes);
+        renderIngredients(uniqueIngredients(sortedRecipes)); 
+        renderAppliances(uniqueAppliances(sortedRecipes)); 
+        renderUstensils(uniqueUstensils(sortedRecipes));
+        recipesView.updateView(sortedRecipes);
+        
+    } catch (error) {
+        console.error(error);
+        alert(
+            "Une erreur s'est produite lors de la récupération des recettes. Veuillez réessayer plus tard."
+            );
     }
 }
 
@@ -431,6 +610,7 @@ async function init() {
         let sortedRecipes = sort(recipes);
         renderIngredients(uniqueIngredients(sortedRecipes)); 
         renderAppliances(uniqueAppliances(sortedRecipes));
+        renderUstensils(uniqueUstensils(sortedRecipes));
         recipesView.updateView(sortedRecipes);
         
         
@@ -439,6 +619,7 @@ async function init() {
             sortedRecipes = sort(recipes);
             renderIngredients(uniqueIngredients(sortedRecipes));
             renderAppliances(uniqueAppliances(sortedRecipes));
+            renderUstensils(uniqueUstensils(sortedRecipes)); 
             recipesView.updateView(sortedRecipes);
         });
         
