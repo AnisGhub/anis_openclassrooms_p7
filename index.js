@@ -3,6 +3,9 @@ import recipesView from "./recipesView.js";
 
 
 const searchInput = document.getElementById("search-input");
+const ingredientSearch = document.getElementById("ingredient-search");
+const applianceSearch = document.getElementById("appliance-search");
+const ustensilSearch = document.getElementById("ustensil-search");
 
 const dropdownContainer = document.getElementById("ingredient-dropdown");
 const ingredientList = document.getElementById("ingredient-list");
@@ -274,8 +277,6 @@ function sortByUstensils(recipes) {
 */
 function renderIngredients(ingredients) {
     ingredientList.innerHTML = "";
-    // pour la recherche d'un ingredient
-    //const filteredIngredients = this.filterIngredients(ingredients);
     ingredients.forEach((ingredient) => {
         const button = document.createElement("button");
         button.classList.add("ingredient-button");
@@ -297,7 +298,6 @@ function renderIngredients(ingredients) {
 */
 function renderAppliances(appliances) {
     applianceList.innerHTML = "";
-
     appliances.forEach((appliance) => {
         const button = document.createElement("button");
         button.classList.add("ingredient-button");
@@ -319,7 +319,6 @@ function renderAppliances(appliances) {
 */
 function renderUstensils(ustensils) {
     ustensilList.innerHTML = "";
-
     ustensils.forEach((ustensil) => {
         const button = document.createElement("button");
         button.classList.add("ustensil-button");
@@ -366,6 +365,7 @@ async function addIngredient(ingredient) {
         renderAppliances(uniqueAppliances(sortedRecipes)); 
         renderUstensils(uniqueUstensils(sortedRecipes)); 
         recipesView.updateView(sortedRecipes);
+        setupSearchEvents(sortedRecipes);
         
     } catch (error) {
         console.error(error);
@@ -409,6 +409,7 @@ async function addAppliance(appliance) {
         renderAppliances(uniqueAppliances(sortedRecipes));
         renderUstensils(uniqueUstensils(sortedRecipes));  
         recipesView.updateView(sortedRecipes);
+        setupSearchEvents(sortedRecipes);
         
     } catch (error) {
         console.error(error);
@@ -455,6 +456,7 @@ async function addUstensil(ustensil) {
         renderAppliances(uniqueAppliances(sortedRecipes)); 
         renderUstensils(uniqueUstensils(sortedRecipes)); 
         recipesView.updateView(sortedRecipes);
+        setupSearchEvents(sortedRecipes);
         
     } catch (error) {
         console.error(error);
@@ -488,6 +490,7 @@ async function removeIngredient(ingredient) {
             renderAppliances(uniqueAppliances(sortedRecipes));
             renderUstensils(uniqueUstensils(sortedRecipes)); 
             recipesView.updateView(sortedRecipes);
+            setupSearchEvents(sortedRecipes);
         }
         
     } catch (error) {
@@ -531,6 +534,7 @@ async function removeAppliance(appliance) {
             renderAppliances(uniqueAppliances(sortedRecipes));
             renderUstensils(uniqueUstensils(sortedRecipes)); 
             recipesView.updateView(sortedRecipes);
+            setupSearchEvents(sortedRecipes);
         }
     } catch (error) {
         console.error(error);
@@ -565,6 +569,7 @@ async function removeUstensil(ustensil) {
         renderAppliances(uniqueAppliances(sortedRecipes)); 
         renderUstensils(uniqueUstensils(sortedRecipes));
         recipesView.updateView(sortedRecipes);
+        setupSearchEvents(sortedRecipes);
         
     } catch (error) {
         console.error(error);
@@ -576,15 +581,108 @@ async function removeUstensil(ustensil) {
 
 
 /**
-* Recherche des ingrédients correspondant au terme de recherche.
+* Recherche des ingrédients dans le dropdown correspondant au terme de recherche.
+* Si la recherche est vide, affiche la liste d'ingredients courante.
 *
 * @function
 * @param {string} searchTerm - Le terme de recherche.
-* @returns {void}
+* @param {Array} sortedRecipes - Le tableau contenant la liste courante de recettes triées
+*
 */
+function searchIngredients(searchTerm, recipes) {
+    const ingredientList = document.getElementById("ingredient-list");
+    const ingredients = ingredientList.getElementsByTagName("button");
+    if (searchTerm.length > 0) {
+        for (let i = 0; i < ingredients.length; i++) {
+        const ingredient = ingredients[i];
+        const name = ingredient.textContent.toLowerCase();
+        if (name.includes(searchTerm)) {
+            ingredient.style.display = "inline-block";
+        } else {
+            ingredient.style.display = "none";
+        }
+        }
+    } else {
+        renderIngredients(uniqueIngredients(recipes));
+    }
+}
+
+/**
+* Recherche des appareils dans le dropdown correspondant au terme de recherche.
+* Si la recherche est vide, affiche la liste d'appareils courante.
+*
+* @function
+* @param {string} searchTerm - Le terme de recherche.
+* @param {Array} sortedRecipes - Le tableau contenant la liste courante de recettes triées.
+*
+*/
+function searchAppliances(searchTerm, recipes) {
+    const applianceList = document.getElementById("appliance-list");
+    const appliances = applianceList.getElementsByTagName("button");
+    if (searchTerm.length > 0) {
+        for (let i = 0; i < appliances.length; i++) {
+            const appliance = appliances[i];
+            const name = appliance.textContent.toLowerCase();
+            if (name.includes(searchTerm)) {
+                appliance.style.display = "inline-block";
+            } else {
+                appliance.style.display = "none";
+            }
+        }
+    } else {
+        renderAppliances(uniqueAppliances(recipes));
+    }
+}
+
+/**
+* Recherche des ustensiles dans le dropdown correspondant au terme de recherche.
+* Si la recherche est vide, affiche la liste d'ustensiles courante.
+*
+* @function
+* @param {string} searchTerm - Le terme de recherche.
+* @param {Array} sortedRecipes - Le tableau contenant la liste courante de recettes triées.
+*
+*/
+function searchUstensils(searchTerm, recipes) {
+    const ustensilList = document.getElementById("ustensil-list");
+    const ustensils = ustensilList.getElementsByTagName("button");
+    if (searchTerm.length > 0) {
+        for (let i = 0; i < ustensils.length; i++) {
+            const ustensil = ustensils[i];
+            const name = ustensil.textContent.toLowerCase();
+            if (name.includes(searchTerm)) {
+                ustensil.style.display = "inline-block";
+            } else {
+                ustensil.style.display = "none";
+            }
+        }
+    } else {
+        renderUstensils(uniqueUstensils(recipes));
+    }
+}
 
 
-function searchIngredients(searchTerm) {}
+/**
+ * Met en place les événements de recherche pour les ingrédients, les appareils et les ustensiles.
+ * @function
+ * @param {Array} recipes - Le tableau contenant la liste courante de recettes triées
+ */
+function setupSearchEvents(recipes) {
+    ingredientSearch.addEventListener("input", (e) => {
+      const searchTerm = e.target.value.toLowerCase();
+      searchIngredients(searchTerm, recipes);
+    });
+  
+    applianceSearch.addEventListener("input", (e) => {
+      const searchTerm = e.target.value.toLowerCase();
+      searchAppliances(searchTerm, recipes);
+    });
+  
+    ustensilSearch.addEventListener("input", (e) => {
+      const searchTerm = e.target.value.toLowerCase();
+      searchUstensils(searchTerm, recipes);
+    });
+}
 
 
 /**
@@ -617,11 +715,8 @@ async function init() {
             recipesView.updateView(sortedRecipes);
         });
         
-        // ingredientsView.bindFilterEvent((searchTerm) => {
-        //   const filteredIngredients = filterIngredients(searchTerm, recipes);
-        //   ingredientsView.updateIngredientDropdown(filteredIngredients);
-        // });
-        
+        setupSearchEvents(sortedRecipes);
+
     } catch (error) {
         console.error(error);
         alert("Une erreur s'est produite lors de la récupération des recettes. Veuillez réessayer plus tard.");
