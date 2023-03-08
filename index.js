@@ -175,12 +175,17 @@ function sortByIngredients(recipes) {
         for (let j = 0; j < selectedIngredients.length; j++) {
             const selectedIngredient = selectedIngredients[j];
             let foundIngredient = false;
-            // Vérifie si l'ingrédient sélectionné est présent dans la recette
-            for (let k = 0; k < recipe.ingredients.length; k++) {
-                const recipeIngredient = recipe.ingredients[k].ingredient;
-                if (recipeIngredient === selectedIngredient) {
-                    foundIngredient = true;
-                    break;
+            // Vérifie si l'ingrédient sélectionné est présent dans le titre ou la description de la recette
+            if (recipe.name.toLowerCase().includes(selectedIngredient) || recipe.description.toLowerCase().includes(selectedIngredient)) {
+                foundIngredient = true;
+            } else {
+                // Vérifie si l'ingrédient sélectionné est présent dans la liste des ingrédients de la recette
+                for (let k = 0; k < recipe.ingredients.length; k++) {
+                    const recipeIngredient = recipe.ingredients[k].ingredient;
+                    if (recipeIngredient === selectedIngredient) {
+                        foundIngredient = true;
+                        break;
+                    }
                 }
             }
             // Si l'ingrédient sélectionné n'est pas présent dans la recette, sort de la boucle
@@ -366,7 +371,7 @@ async function addIngredient(ingredient) {
         renderUstensils(uniqueUstensils(sortedRecipes)); 
         recipesView.updateView(sortedRecipes);
         setupSearchEvents(sortedRecipes);
-        
+
     } catch (error) {
         console.error(error);
         alert("Une erreur s'est produite lors de la récupération des recettes. Veuillez réessayer plus tard.");
