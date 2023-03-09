@@ -68,6 +68,11 @@ form svg{
     right: 13px;
     top: 24px;
     cursor: pointer;
+    transition: 0.3s;
+}
+
+.dropdown.active .dropdown-arrow{
+    transform: rotate(180deg);
 }
 
 .dropdown.active{
