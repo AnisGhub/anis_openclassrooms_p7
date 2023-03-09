@@ -1,4 +1,5 @@
 import recipesView from "./recipesView.js";
+import { initDropDown } from './dropdown.js';
 
 
 
@@ -7,10 +8,12 @@ const ingredientSearch = document.getElementById("ingredient-search");
 const applianceSearch = document.getElementById("appliance-search");
 const ustensilSearch = document.getElementById("ustensil-search");
 
-const dropdownContainer = document.getElementById("ingredient-dropdown");
+const dropdowns = document.querySelectorAll('.dropdown');
+
 const ingredientList = document.getElementById("ingredient-list");
 const applianceList = document.getElementById("appliance-list");
 const ustensilList = document.getElementById("ustensil-list");
+
 const tagContainer = document.getElementById("tags");
 
 
@@ -165,7 +168,7 @@ function sortByIngredients(recipes) {
     if (selectedTags.length === 0) {
         return recipes;
     }
-    
+
     const filteredRecipes = [];
     // Parcours toutes les recettes et vérifie si elles contiennent tous les ingrédients sélectionnés
     for (let i = 0; i < recipes.length; i++) {
@@ -689,7 +692,6 @@ function setupSearchEvents(recipes) {
     });
 }
 
-
 /**
 * Initialise l'application.
 *
@@ -709,6 +711,7 @@ async function init() {
         renderAppliances(uniqueAppliances(sortedRecipes));
         renderUstensils(uniqueUstensils(sortedRecipes));
         recipesView.updateView(sortedRecipes);
+        initDropDown(dropdowns);
         
         
         // Event Listener management pour les recherches 
