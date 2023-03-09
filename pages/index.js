@@ -1,5 +1,6 @@
-import recipesView from "./recipesView.js";
-import { initDropDown } from './dropdown.js';
+import recipesView from "../templates/recipesView.js";
+import { initDropDown } from '../utils/dropdown.js';
+import { RecipesFactory } from "../factories/RecipesFactory.js";
 
 
 
@@ -27,7 +28,12 @@ const tagContainer = document.getElementById("tags");
 async function fetchRecipes() {
     try {
         const response = await fetch("data.json");
-        const recipes = await response.json();
+        const data = await response.json();
+        let recipes = [];
+        data.map(r => {
+            let recipe = new RecipesFactory(r, 'json');
+            recipes.push(recipe);
+        })
         return recipes;
     } catch (error) {
         console.error(error);
