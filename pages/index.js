@@ -1,6 +1,6 @@
 import recipesView from "../templates/recipesView.js";
 import { initDropDown } from '../utils/dropdown.js';
-import { RecipesFactory } from "../factories/RecipesFactory.js";
+import { RecipesFactory, RECIPES_DATA_TYPE } from "../factories/RecipesFactory.js";
 
 
 
@@ -31,7 +31,7 @@ async function fetchRecipes() {
         const data = await response.json();
         let recipes = [];
         data.map(r => {
-            let recipe = new RecipesFactory(r, 'json');
+            let recipe = new RecipesFactory(r, RECIPES_DATA_TYPE.JSON);
             recipes.push(recipe);
         })
         return recipes;
