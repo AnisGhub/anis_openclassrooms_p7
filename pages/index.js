@@ -68,16 +68,18 @@ function sort(recipes) {
 * @returns {Array} Un tableau d'ingrédients unique.
 */
 function uniqueIngredients(recipes) {
-    const ingredientsList = new Set();
-    const uniqueIngredients = recipes.flatMap(recipe => recipe.ingredients)
-        .filter(ingredient => {
-            const ingredientTitle = ingredient.ingredient.toLowerCase();
-            if (!ingredientsList.has(ingredientTitle)) {
-                ingredientsList.add(ingredientTitle);
-                return true;
+    const uniqueIngredients = [];
+    const ingredientsList = [];
+    for (let i = 0; i < recipes.length; i++) {
+        const recipe = recipes[i];
+        for (let j = 0; j < recipe.ingredients.length; j++) {
+            const ingredient = recipe.ingredients[j].ingredient.toLowerCase();
+            if(!ingredientsList.includes(ingredient)){
+                ingredientsList.push(ingredient);
+                uniqueIngredients.push(recipe.ingredients[j]);
             }
-            return false;
-        });
+        }
+    }
     return uniqueIngredients;
 }
 
@@ -90,15 +92,16 @@ function uniqueIngredients(recipes) {
  * @returns {Array} Un tableau d'appareils unique.
  */
 function uniqueAppliances(recipes) {
-    const appliancesList = new Set();
-    const uniqueAppliances = recipes.filter(recipe => {
-      const appliance = recipe.appliance.toLowerCase();
-      if (!appliancesList.has(appliance)) {
-        appliancesList.add(appliance);
-        return true;
-      }
-      return false;
-    }).map(recipe => recipe.appliance);
+    const uniqueAppliances = [];
+    const appliancesList = [];
+    for (let i = 0; i < recipes.length; i++) {
+        const recipe = recipes[i];
+        const appliance = recipe.appliance.toLowerCase();
+        if (!appliancesList.includes(appliance)) {
+            appliancesList.push(appliance);
+            uniqueAppliances.push(recipe.appliance);
+        }
+    }
     return uniqueAppliances;
 }
 
@@ -111,16 +114,18 @@ function uniqueAppliances(recipes) {
  * @returns {Array} Un tableau d'ustensiles unique.
  */
 function uniqueUstensils(recipes) {
-    const ustensilsList = new Set();
-    const uniqueUstensils = recipes.flatMap(recipe => recipe.ustensils)
-        .filter(ustensil => {
-            const ustensilTitle = ustensil.toLowerCase();
-            if (!ustensilsList.has(ustensilTitle)) {
-                ustensilsList.add(ustensilTitle);
-                return true;
+    const uniqueUstensils = [];
+    const ustensilsList = [];
+    for (let i = 0; i < recipes.length; i++) {
+        const recipe = recipes[i];
+        for (let j = 0; j < recipe.ustensils.length; j++) {
+            const ustensil = recipe.ustensils[j].toLowerCase();
+            if (!ustensilsList.includes(ustensil)) {
+                ustensilsList.push(ustensil);
+                uniqueUstensils.push(recipe.ustensils[j]);
             }
-            return false;
-        });
+        }
+    }
     return uniqueUstensils;
 }
 
@@ -137,15 +142,22 @@ function sortByKeyword(recipes) {
     if (!searchTerm || searchTerm.length < 3) {
         return recipes;
     }
-    return recipes.filter(recipe =>
-        recipe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        recipe.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        recipe.ingredients.some(ingredient =>
-            ingredient.ingredient.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-    );
+    let filteredRecipes = [];
+    for (let i = 0; i < recipes.length; i++) {
+        if (recipes[i].name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        recipes[i].description.toLowerCase().includes(searchTerm.toLowerCase())) {
+            filteredRecipes.push(recipes[i]);
+        } else {
+            for (let j =0; j < recipes[i].ingredients.length; j++) {
+                if (recipes[i].ingredients[j].ingredient.toLowerCase().includes(searchTerm.toLowerCase())) {
+                    filteredRecipes.push(recipes[i]);
+                    break;
+                }
+            }
+        }
+    }
+    return filteredRecipes;
 }
-
 
 /**
 * Trie les recettes en fonction des tags d'ingrédients sélectionnés par l'utilisateur.
