@@ -155,48 +155,15 @@ function sortByKeyword(recipes) {
 * @returns {Array} - Un tableau trié de recettes.
 */
 function sortByIngredients(recipes) {
-    const selectedTags = Array.from(tagContainer.querySelectorAll(".ingredient-tag"));
-    const selectedIngredients = selectedTags.map(tag => tag.innerHTML);
-    
-    // Si aucun ingrédient n'est sélectionné, retourne toutes les recettes
-    if (selectedTags.length === 0) {
-        return recipes;
+    const selectedIngredients = Array.from(tagContainer.querySelectorAll(".ingredient-tag")).map(tag => tag.innerHTML.toLowerCase());
+    if (selectedIngredients.length === 0) {
+      return recipes;
     }
-
-    const filteredRecipes = [];
-    // Parcours toutes les recettes et vérifie si elles contiennent tous les ingrédients sélectionnés
-    for (let i = 0; i < recipes.length; i++) {
-        const recipe = recipes[i];
-        let containsAllIngredients = true;
-        // Vérifie si chaque ingrédient sélectionné est présent dans la recette
-        for (let j = 0; j < selectedIngredients.length; j++) {
-            const selectedIngredient = selectedIngredients[j].toLowerCase();
-            let foundIngredient = false;
-            // Vérifie si l'ingrédient sélectionné est présent dans le titre ou la description de la recette
-            if (recipe.name.toLowerCase().includes(selectedIngredient) || recipe.description.toLowerCase().includes(selectedIngredient)) {
-                foundIngredient = true;
-            } else {
-                // Vérifie si l'ingrédient sélectionné est présent dans la liste des ingrédients de la recette
-                for (let k = 0; k < recipe.ingredients.length; k++) {
-                    const recipeIngredient = recipe.ingredients[k].ingredient.toLowerCase();
-                    if (recipeIngredient === selectedIngredient) {
-                        foundIngredient = true;
-                        break;
-                    }
-                }
-            }
-            // Si l'ingrédient sélectionné n'est pas présent dans la recette, sort de la boucle
-            if (!foundIngredient) {
-                containsAllIngredients = false;
-                break;
-            }
-        }
-        // Si la recette contient tous les ingrédients sélectionnés, l'ajoute au tableau des recettes filtrées
-        if (containsAllIngredients) {
-            filteredRecipes.push(recipe);
-        }
-    }
-    return filteredRecipes;
+    return recipes.filter(recipe => {
+      const recipeIngredients = recipe.ingredients.map(ingredient => ingredient.ingredient.toLowerCase());
+      const recipeText = `${recipe.name} ${recipe.description} ${recipeIngredients.join(' ')}`.toLowerCase();
+      return selectedIngredients.every(ingredient => recipeText.includes(ingredient));
+    });
 }
 
 
@@ -208,24 +175,12 @@ function sortByIngredients(recipes) {
  * @returns {Array} La liste des recettes triées en fonction de l'appareil sélectionné par l'utilisateur.
  */
 function sortByAppliance(recipes) {
-    // Récupère le tag appareil sélectionné
     const selectedTag = tagContainer.querySelector(".appliance-tag");
-    // Si aucun tag appareil n'est sélectionné, renvoie la liste des recettes non triées
     if (!selectedTag) {
-      return recipes;
+        return recipes;
     }
-    const selectedAppliance = selectedTag.innerHTML;
-    const filteredRecipes = [];
-  
-    // Parcours chaque recette et ajoute celles qui correspondent à l'appareil sélectionné à la liste filtrée
-    for (let i = 0; i < recipes.length; i++) {
-      const recipe = recipes[i];
-      if (recipe.appliance.toLowerCase() === selectedAppliance.toLowerCase()) {
-        filteredRecipes.push(recipe);
-      }
-    }
-  
-    return filteredRecipes;
+    const selectedAppliance = selectedTag.innerHTML.toLowerCase();
+    return recipes.filter(recipe => recipe.appliance.toLowerCase() === selectedAppliance);
 }
 
 
@@ -243,30 +198,11 @@ function sortByUstensils(recipes) {
     }
 
     const selectedUstensils = selectedTags.map(tag => tag.innerHTML.toLowerCase());
-    const filteredRecipes = [];
 
-    for (let i = 0; i < recipes.length; i++) {
-        const recipe = recipes[i];
-        const recipeUstensils = [];
-        for (let i = 0; i < recipe.ustensils.length; i++) {
-            recipeUstensils.push(recipe.ustensils[i].toLowerCase());
-        }
-        let includeRecipe = true;
-
-        for (let j = 0; j < selectedUstensils.length; j++) {
-            const selectedUstensil = selectedUstensils[j];
-            if (!recipeUstensils.includes(selectedUstensil)) {
-                includeRecipe = false;
-                break;
-            }
-        }
-
-        if (includeRecipe) {
-            filteredRecipes.push(recipe);
-        }
-    }
-
-    return filteredRecipes;
+    return recipes.filter(recipe => {
+        const recipeUstensils = recipe.ustensils.map(ustensil => ustensil.toLowerCase());
+        return selectedUstensils.every(ustensil => recipeUstensils.includes(ustensil));
+    });
 }
 
 
