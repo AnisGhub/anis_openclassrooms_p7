@@ -153,6 +153,17 @@ form svg{
     margin: 10px 0;
     color: #fff;
 }
+#tags span{
+    padding: 10px 20px;
+}
+#tags span::after{
+    content: "x";
+    border: 2px solid #FFFFFF;
+    border-radius: 50%;
+    padding: 2px 6px;
+    margin-left: 8px;
+    cursor: pointer;
+}
 
 .ingredient-tag {
     background-color: #3282f7;
